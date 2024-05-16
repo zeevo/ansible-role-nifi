@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+{{ nifi_ansible_xml_managed_banner }}
+<tenants>
+    <groups>
+        {% for group in nifi_groups %}
+                <group identifier="{{ group.id }}" name="{{ group.name }}">
+            {% for user in nifi_users %}
+                {% if group.name in user.groups | default([]) %}
+                        <user identifier="{{ user.id }}" />
+                {% endif %}
+            {% endfor %}
+                </group>
+        {% endfor %}
+    </groups>
+    <users>
+{% for user in nifi_users %}
+        <user identifier="{{ user.id }}" identity="{{ user.dn }}" />
+{% endfor %}
+{% for node in nifi_nodes %}
+    <user identifier="{{ node.dn }}" identity="{{ node.dn }}" />
+{% endfor %}
+    </users>
+</tenants>

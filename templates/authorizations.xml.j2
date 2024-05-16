@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+{{ nifi_ansible_xml_managed_banner }}
+<authorizations>
+    <policies>
+
+{% for policy in nifi_authorizations_policies %}
+    {% for action in ["R", "W"]%}
+        <policy identifier="{{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=8') }}" resource="/{{ policy }}" action="{{ action }}">
+        {% for group in nifi_groups %}
+            {% if policy in group.permissions %}
+                    <group identifier="{{ group.id }}"/>
+            {% endif %}
+            {% for node in nifi_nodes %}
+                    <user identifier="{{ node.dn }}" />
+            {% endfor %}
+        {% endfor %}
+        </policy>
+    {% endfor %}
+{% endfor %}
+
+{% for policy in nifi_root_pg_policies %}
+    {% for action in ["R", "W"]%}
+        {% if nifi_root_pg_id is defined %}
+            <policy identifier="{{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=8') }}" resource="/{{ policy }}/{{ nifi_root_pg_id }}" action="{{ action }}">
+                {% for group in nifi_groups %}
+                            <group identifier="{{ group.id }}"/>
+                    {% for node in nifi_nodes %}
+                            <user identifier="{{ node.dn }}" />
+                    {% endfor %}
+                {% endfor %}
+            </policy>
+         {% endif %}
+    {% endfor %}
+{% endfor %}
+
+    </policies>
+</authorizations>

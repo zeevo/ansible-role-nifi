@@ -1,0 +1,60 @@
+{{ nifi_ansible_yml_managed_banner }}
+
+services:
+
+  {{ nifi_name }}:
+    image: {{ nifi_image }}
+    hostname: {{ nifi_hostname }}
+    networks:
+      - nifi_network
+    volumes:
+      - {{ nifi_home_dir }}/nifi_certs:/opt/certs
+      - {{ nifi_data_dir }}/conf:/opt/nifi/nifi-current/conf
+      - {{ nifi_data_dir }}/extensions:/opt/nifi/nifi-current/extensions
+      - {{ nifi_data_dir }}/database_repository:/opt/nifi/nifi-current/database_repository
+      - {{ nifi_data_dir }}/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - {{ nifi_data_dir }}/content_repository:/opt/nifi/nifi-current/content_repository
+      - {{ nifi_data_dir }}/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - {{ nifi_data_dir }}/state:/opt/nifi/nifi-current/state
+      - {{ nifi_data_dir }}/logs:/opt/nifi/nifi-current/logs
+      - {{ nifi_nar_extensions_dir }}:/opt/nifi/nifi-current/nar_extensions
+{% for item in nifi_extra_docker_volumes %}
+      - {{ item }}
+{% endfor %}
+      # Support custom nar extensions
+      # - ./nifi-starter-nar/target/:/opt/nifi/nifi-current/nar_extensions
+{% if nifi_ports | length > 0 %}
+    ports:
+{% for port in nifi_ports %}
+      - {{ port }}
+{% endfor %}
+{% endif %}
+    environment:
+      AUTH: tls
+      KEYSTORE_PATH: {{ nifi_security_keystore }}
+      KEYSTORE_TYPE: {{ nifi_security_keystore_type }}
+      KEYSTORE_PASSWORD: {{ nifi_security_keystore_password }}
+      TRUSTSTORE_PATH: {{ nifi_security_truststore }}
+      TRUSTSTORE_TYPE: {{ nifi_security_truststore_type }}
+      TRUSTSTORE_PASSWORD: {{ nifi_security_truststore_password }}
+      NIFI_CLUSTER_IS_NODE: {{ nifi_cluster_is_node | string | lower}}
+      NIFI_CLUSTER_ADDRESS: {{ nifi_cluster_address }}
+      NIFI_CLUSTER_NODE_PROTOCOL_PORT: {{ nifi_cluster_node_protocol_port }}
+      NIFI_ZK_CONNECT_STRING: {{ nifi_zookeeper_connect_string }}
+      NIFI_ELECTION_MAX_WAIT: {{ nifi_cluster_flow_election_wait_time }}
+      NIFI_WEB_PROXY_HOST: {{ nifi_web_proxy_host }}
+      NIFI_WEB_HTTPS_HOST: {{ nifi_web_https_host }}
+{% if nifi_single_user_mode  %}
+      SINGLE_USER_CREDENTIALS_USERNAME: {{ nifi_single_user_credentials_username }}
+      SINGLE_USER_CREDENTIALS_PASSWORD: {{ nifi_single_user_credentials_password }}
+      NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer
+      NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
+{% endif %}
+{% if nifi_initial_admin_identity is defined %}
+      INITIAL_ADMIN_IDENTITY: {{ nifi_initial_admin_identity }}
+{% endif %}
+
+networks:
+  nifi_network:
+    name: {{ nifi_network }}
+    external: true

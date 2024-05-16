@@ -1,0 +1,8 @@
+{{ nifi_ansible_yml_managed_banner }}
+
+docker compose run \
+    --entrypoint /opt/nifi/nifi-toolkit-current/bin/file-manager.sh \
+    nifi \
+    -o backup \
+    -b /data/backup \
+    -c /opt/nifi/nifi-current

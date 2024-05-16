@@ -1,0 +1,4 @@
+#!/bin/bash
+{{ nifi_ansible_yml_managed_banner }}
+
+docker compose -f {{ nifi_home_dir }}/docker-compose.yml run --entrypoint "/bin/bash -c" {{ nifi_name }} "keytool -v -list -keystore {{ nifi_security_truststore }} -storepass {{ nifi_security_truststore_password }}"

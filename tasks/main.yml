@@ -1,0 +1,189 @@
+- name: Create nifi group
+  group:
+    name: "{{ nifi_group }}"
+    state: present
+
+- name: Create nifi user
+  user:
+    name: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add nifi user to docker group
+  shell: usermod -aG docker {{ nifi_user }}
+  become: true
+
+- name: Create directory for nifi
+  file:
+    path: "{{ nifi_home_dir }}"
+    state: directory
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Create directory for nifi scripts
+  file:
+    path: "{{ nifi_home_dir }}/scripts"
+    state: directory
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Create directory for nifi certs
+  file:
+    path: "{{ nifi_certs_dir }}"
+    state: directory
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Create nifi internals directories
+  file:
+    path: "{{ nifi_home_dir }}/data/{{ item }}"
+    state: directory
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+  loop:
+    - content_repository
+    - database_repository
+    - flowfile_repository
+    - logs
+    - provenance_repository
+    - state
+    - nar_extensions
+
+- name: Add nifi docker compose
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ nifi_docker_compose }}"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Check if bootstrap needed
+  stat:
+    path: "{{ nifi_home_dir }}/bootstrapped"
+  register: p
+
+- name: Bootstrap nifi
+  include_tasks: bootstrap.yml
+  when: not p.stat.exists
+
+- name: Add authorizations.xml
+  when: nifi_single_user_mode == false
+  template:
+    src: authorizations.xml.j2
+    dest: "{{ nifi_data_dir }}/conf/authorizations.xml"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add users.xml
+  when: nifi_single_user_mode == false
+  template:
+    src: users.xml.j2
+    dest: "{{ nifi_data_dir }}/conf/users.xml"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add authorizers.xml
+  when: nifi_single_user_mode == false
+  template:
+    src: authorizers.xml.j2
+    dest: "{{ nifi_data_dir }}/conf/authorizers.xml"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add nifi.properties
+  template:
+    src: nifi.properties.j2
+    dest: "{{ nifi_data_dir }}/conf/nifi.properties"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Make tmp cert dir
+  file:
+    path: /tmp/ansible-nifi-certs
+    state: directory
+
+- name: Copy tmp certs
+  loop: "{{ nifi_users + nifi_additional_certs }}"
+  copy:
+    src: "{{ item.cert }}"
+    dest: "/tmp/ansible-nifi-certs/{{ item.cert }}"
+
+- name: Copy make_cert script
+  loop: "{{ nifi_users }}"
+  copy:
+    src: make_cert.sh
+    dest: "{{ nifi_home_dir }}/scripts/make_cert.sh"
+
+- name: Create truststore and keystore
+  shell: "docker run --user root -v {{ nifi_home_dir }}/nifi_certs:/opt/certs apache/nifi-toolkit:latest tls-toolkit standalone -O --subjectAlternativeNames {{ nifi_name }},{{ nifi_subject_alternative_names | join(',') }} -o /opt/certs -n {{ nifi_name }} -P {{ nifi_security_truststore_password }} -K {{ nifi_security_keystore_password }} -S {{ nifi_security_keystore_password }}"
+  when: nifi_auto_create_stores
+
+- name: Copy truststore
+  copy:
+    src: "{{ nifi_truststore }}"
+    dest: "{{ nifi_certs_dir }}/truststore.jks"
+
+- name: Copy keystore
+  copy:
+    src: "{{ nifi_keystore }}"
+    dest: "{{ nifi_certs_dir }}/keystore.jks"
+
+- name: Change permissions on /remote/file/path to ansible:user so we can write to it
+  file:
+    path: "{{ nifi_home_dir }}/nifi_certs"
+    recurse: true
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add users to truststore
+  loop: "{{ nifi_users + nifi_additional_certs }}"
+  shell: "docker run -v /tmp/ansible-nifi-certs:/tmp/ansible-nifi-certs -v {{ nifi_certs_dir }}:/opt/certs openjdk keytool -noprompt -import -file /tmp/ansible-nifi-certs/{{ item.cert }} -alias {{ item.alias }} -keystore /opt/certs/truststore.jks -storepass {{ nifi_security_truststore_password }}"
+  ignore_errors: true
+
+- name: Create nifi network
+  shell: "docker network create {{ nifi_network }} || true"
+  ignore_errors: true
+
+- name: Stop nifi
+  shell: "docker compose -f {{ nifi_docker_compose }} down"
+  ignore_errors: true
+
+- name: Start nifi
+  shell: "docker compose -f {{ nifi_docker_compose }} up -d --remove-orphans"
+
+- name: Add backup.sh
+  template:
+    src: backup.sh.j2
+    dest: "{{ nifi_home_dir }}/backup.sh"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add restore.sh
+  template:
+    src: restore.sh.j2
+    dest: "{{ nifi_home_dir }}/restore.sh"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add get_shell
+  template:
+    src: get_shell.sh.j2
+    dest: "{{ nifi_home_dir }}/get_shell.sh"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add view_keystore
+  template:
+    src: view_keystore.sh.j2
+    dest: "{{ nifi_home_dir }}/view_keystore.sh"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add view_truststore
+  template:
+    src: view_truststore.sh.j2
+    dest: "{{ nifi_home_dir }}/view_truststore.sh"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Message
+  debug:
+    msg: IMPORTANT -- set the nifi_root_pg_id variable for correct clustering permissions

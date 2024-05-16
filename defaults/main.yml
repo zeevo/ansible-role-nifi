@@ -1,0 +1,108 @@
+# Base
+nifi_name: nifi
+nifi_hostname: "{{ nifi_name }}"
+nifi_user: nifi # This user MUST have UID 1000
+nifi_https_port: 8443
+nifi_image: apache/nifi:2.0.0-M1
+nifi_group: nifi
+nifi_home_dir: /home/nifi
+nifi_data_dir: "{{ nifi_home_dir }}/data"
+nifi_network: nifi
+nifi_nar_extensions_dir: "{{ nifi_data_dir }}/nar_extensions"
+nifi_truststore: truststore.jks
+nifi_keystore: keystore.jks
+
+# Base environment
+
+# Cluster
+nifi_cluster_address: "{{ nifi_name }}"
+nifi_cluster_is_node: false
+nifi_cluster_node_protocol_port: 8082
+nifi_zookeeper_connect_string: zookeeper:2181
+nifi_cluster_flow_election_wait_time: 1 min
+
+# Web
+nifi_web_http_host: localhost
+nifi_web_http_port: 8080
+nifi_web_https_port: 8443
+nifi_web_https_host: localhost
+nifi_web_proxy_host: localhost
+
+# Single User Mode
+nifi_single_user_mode: false
+nifi_single_user_credentials_username: nifi
+nifi_single_user_credentials_password: nifinifinifinifi
+nifi_security_user_authorizer: single-user-authorizer
+nifi_security_user_login_identity_provider: single-user-provider
+
+# Flow Configuration
+nifi_flow_configuration_archive_enabled: true
+nifi_content_repository_archive_enabled: true
+
+# Provenance
+nifi_provenance_repository_max_storage_size: 10 GB
+
+# Users and Groups
+nifi_groups: []
+nifi_users: []
+
+# Nodes
+nifi_nodes:
+  - dn: "CN={{ nifi_name }}, OU=NIFI"
+
+# Security
+nifi_security_keystore_password: keystorepass
+nifi_security_keystore: /opt/certs/keystore.jks
+nifi_security_keystore_type: JKS
+nifi_security_truststore_password: truststorepass
+nifi_security_truststore: /opt/certs/truststore.jks
+nifi_security_truststore_type: JKS
+nifi_sensitive_props_key: my-random-string
+
+# Docker
+nifi_ports:
+  - "8443:8443"
+  - "8080:8080"
+  - "8082:8082"
+  - "6342:6342"
+
+# Other
+nifi_additional_certs: []
+nifi_subject_alternative_names: ["localhost"]
+nifi_extra_docker_volumes: []
+nifi_auto_create_stores: false
+nifi_ansible_xml_managed_banner: |
+  <!--
+  =================================================================================
+  This file is managed by Ansible. Changes may be overwritten when Ansible
+  runs again. To configure this file, see https://github.com/zeevo/ansible-starter.
+  =================================================================================
+  -->
+
+nifi_ansible_yml_managed_banner: |
+  # =================================================================================
+  # This file is managed by Ansible. Changes may be overwritten when Ansible
+  # runs again. To configure this file, see https://github.com/zeevo/ansible-starter.
+  # =================================================================================
+
+# Internal
+nifi_authorizations_policies:
+  - flow
+  - restricted-components
+  - tenants
+  - policies
+  - controller
+  - system
+  - site-to-site
+  - proxy
+  - counters
+  - provenance
+nifi_root_pg_policies:
+  - process-groups
+  - operation/process-groups
+  - provenance-data/process-groups
+  - data/process-groups
+  - policies/process-groups
+nifi_docker_compose: "{{ nifi_home_dir }}/docker-compose.yml"
+nifi_certs_dir: "{{ nifi_home_dir }}/nifi_certs"
+nifi_root_pg_id: 554766c3-018f-1000-093c-20f8f3656d4c

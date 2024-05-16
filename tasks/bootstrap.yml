@@ -1,0 +1,64 @@
+- name: Cleanup bootstrap container
+  shell: docker rm -f nifi-bootstrap
+
+- name: Bootstrap nifi
+  shell: "docker run -d --name nifi-bootstrap -e SINGLE_USER_CREDENTIALS_USERNAME={{ nifi_single_user_credentials_username }} -e SINGLE_USER_CREDENTIALS_PASSWORD={{ nifi_single_user_credentials_password }} {{ nifi_image }}"
+
+- name: Pause for 15 seconds
+  pause:
+    seconds: 15
+
+- name: bootstrap conf out of container
+  shell: "docker cp nifi-bootstrap:/opt/nifi/nifi-current/conf {{ nifi_data_dir }}/conf"
+
+- name: Copy internals
+  shell: "docker cp nifi-bootstrap:/opt/nifi/nifi-current/{{ item }} {{ nifi_data_dir }}/"
+  loop:
+    - conf
+    - content_repository
+    - database_repository
+    - flowfile_repository
+    - state
+    - logs
+    - nar_extensions
+
+- name: Change permissions on /remote/file/path to ansible:user so we can write to it
+  file:
+    path: "{{ nifi_data_dir }}/{{ item }}"
+    recurse: true
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+  loop:
+    - conf
+    - content_repository
+    - database_repository
+    - flowfile_repository
+    - state
+    - logs
+    - nar_extensions
+
+- name: Cleanup bootstrap container
+  shell: docker rm -f nifi-bootstrap
+
+- name: Add initial flow.json to tmp
+  template:
+    src: flow.json.j2
+    dest: "/tmp/flow.json"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Gzip flow.json.gz and move to conf
+  shell: "gzip -f /tmp/flow.json && mv /tmp/flow.json.gz {{ nifi_data_dir }}/conf/flow.json.gz"
+
+- name: Add initial flow.json.gz
+  file:
+    path: "{{ nifi_data_dir }}/conf/flow.json.gz"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Write bootstrap file
+  file:
+    path: "{{ nifi_home_dir }}/bootstrapped"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    state: touch

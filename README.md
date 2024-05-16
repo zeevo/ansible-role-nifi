@@ -6,7 +6,7 @@ Deploy a NiFi cluster.
 
 This role depends on `docker` being available on hosts.
 
-## Variables
+## Role Variables
 
 Available variables are listed below, along with default values (see `defaults/main.yml`)
 

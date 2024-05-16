@@ -1,9 +1,11 @@
 galaxy_info:
+  role_name: zeevo.nifi
+  namespace: zeevo
   author: zeevo
   description: Deploy a NiFi cluster
   company: https://zeevo.io
   license: MIT
-  min_ansible_version: 2.1
+  min_ansible_version: "2.1"
   galaxy_tags:
     - nifi
     - apache

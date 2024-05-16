@@ -42,18 +42,19 @@ nifi_zookeeper_connect_string: my-zookeeper-server.com:2181 # your Zookeeper con
 
 ## Dependencies
 
-Deploy a zookeeper using the `zeevo.zookeeper` companion Role.
+Deploy a zookeeper using the [zeevo.zookeeper](https://github.com/zeevo/ansible-role-zookeeper) companion Role.
 
 ```yml
 # Zookeeper playbook
 - name: zookeeper
-
   vars:
-    zookeeper_user: zookeeper
-
+    zookeeper_user: admin
+    docker_users:
+      - admin
   hosts: zookeeper
   become: true
   roles:
+    - zeevo.docker
     - zeevo.zookeeper
 ```
 
@@ -63,19 +64,27 @@ Including an example of how to use your role (for instance, with variables passe
 
 ```yml
 # Playbook `nifi.yml`
+- name: docker
+  hosts: all
+  become: true
+  vars:
+    docker_users:
+      - admin # Should be the user that will run NiFi and Zookeeper
+  roles:
+    - zeevo.docker
 
 - name: zookeeper
   hosts: zookeeper
   become: true
+  vars:
+    zookeeper_user: admin
   roles:
-    - zeevo.docker
     - zeevo.zookeeper
 
 - name: nifi
   hosts: nifi
   become: true
   roles:
-    - zeevo.docker
     - zeevo.nifi
 ```
 

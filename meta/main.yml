@@ -1,5 +1,4 @@
 galaxy_info:
-  role_name: zeevo.nifi
   namespace: zeevo
   author: zeevo
   description: Deploy a NiFi cluster

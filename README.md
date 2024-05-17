@@ -84,6 +84,8 @@ Including an example of how to use your role (for instance, with variables passe
 - name: nifi
   hosts: nifi
   become: true
+  vars:
+    nifi_user: admin
   roles:
     - zeevo.nifi
 ```

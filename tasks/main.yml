@@ -40,6 +40,7 @@
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
   loop:
+    - conf
     - content_repository
     - database_repository
     - flowfile_repository
@@ -55,17 +56,24 @@
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
 
-- name: Check if bootstrap needed
+- name: Check if flow.json.gz exists
   stat:
-    path: "{{ nifi_home_dir }}/bootstrapped"
-  register: p
+    path: "{{ nifi_data_dir }}/conf/flow.json.gz"
+  register: flowjson
 
-- name: Bootstrap nifi
-  include_tasks: bootstrap.yml
-  when: not p.stat.exists
+- name: Add initial flow.json to tmp
+  when: not flowjson.stat.exists
+  template:
+    src: flow.json.j2
+    dest: "/tmp/flow.json"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Gzip flow.json.gz and move to conf
+  when: not flowjson.stat.exists
+  shell: "gzip -f /tmp/flow.json && mv /tmp/flow.json.gz {{ nifi_data_dir }}/conf/flow.json.gz"
 
 - name: Add authorizations.xml
-  when: nifi_single_user_mode == false
   template:
     src: authorizations.xml.j2
     dest: "{{ nifi_data_dir }}/conf/authorizations.xml"
@@ -73,7 +81,6 @@
     group: "{{ nifi_group }}"
 
 - name: Add users.xml
-  when: nifi_single_user_mode == false
   template:
     src: users.xml.j2
     dest: "{{ nifi_data_dir }}/conf/users.xml"
@@ -81,19 +88,23 @@
     group: "{{ nifi_group }}"
 
 - name: Add authorizers.xml
-  when: nifi_single_user_mode == false
   template:
     src: authorizers.xml.j2
     dest: "{{ nifi_data_dir }}/conf/authorizers.xml"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
 
-- name: Add nifi.properties
+- name: Add conf internals
   template:
-    src: nifi.properties.j2
-    dest: "{{ nifi_data_dir }}/conf/nifi.properties"
+    src: "{{ item.0 }}"
+    dest: "{{ nifi_data_dir }}/conf/{{ item.1 }}"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
+  loop:
+    - ["bootstrap.conf.j2", "bootstrap.conf"]
+    - ["logback.xml.j2", "logback.xml"]
+    - ["login-identity-providers.xml.j2", "login-identity-providers.xml"]
+    - ["state-management.xml.j2", "state-management.xml"]
 
 - name: Make tmp cert dir
   file:

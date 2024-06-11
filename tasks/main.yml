@@ -105,6 +105,7 @@
     - ["logback.xml.j2", "logback.xml"]
     - ["login-identity-providers.xml.j2", "login-identity-providers.xml"]
     - ["state-management.xml.j2", "state-management.xml"]
+    - ["nifi.properties.j2", "nifi.properties"]
 
 - name: Make tmp cert dir
   file:

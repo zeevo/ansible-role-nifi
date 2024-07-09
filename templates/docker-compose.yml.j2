@@ -5,6 +5,7 @@ services:
   {{ nifi_name }}:
     image: {{ nifi_image }}
     hostname: {{ nifi_hostname }}
+    restart: {{ nifi_docker_restart_policy }}
     networks:
       - nifi_network
     volumes:
@@ -21,8 +22,6 @@ services:
 {% for item in nifi_extra_docker_volumes %}
       - {{ item }}
 {% endfor %}
-      # Support custom nar extensions
-      # - ./nifi-starter-nar/target/:/opt/nifi/nifi-current/nar_extensions
 {% if nifi_ports | length > 0 %}
     ports:
 {% for port in nifi_ports %}

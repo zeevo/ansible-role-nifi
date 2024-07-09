@@ -65,6 +65,7 @@ nifi_ports:
   - "8080:8080"
   - "8082:8082"
   - "6342:6342"
+nifi_docker_restart_policy: always
 
 # Other
 nifi_additional_certs: []
@@ -74,15 +75,15 @@ nifi_auto_create_stores: false
 nifi_ansible_xml_managed_banner: |
   <!--
   =================================================================================
-  This file is managed by Ansible. Changes may be overwritten when Ansible
-  runs again. To configure this file, see https://github.com/zeevo/ansible-starter.
+  This file is managed by Ansible. Changes may be overwritten when Ansible runs
+  again. To configure this file, see https://github.com/zeevo/ansible-role-nifi.
   =================================================================================
   -->
 
 nifi_ansible_yml_managed_banner: |
   # =================================================================================
-  # This file is managed by Ansible. Changes may be overwritten when Ansible
-  # runs again. To configure this file, see https://github.com/zeevo/ansible-starter.
+  # This file is managed by Ansible. Changes may be overwritten when Ansible runs
+  # again. To configure this file, see https://github.com/zeevo/ansible-role-nifi.
   # =================================================================================
 
 # Internal

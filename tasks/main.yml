@@ -195,7 +195,3 @@
     dest: "{{ nifi_home_dir }}/view_truststore.sh"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
-
-- name: Message
-  debug:
-    msg: IMPORTANT -- set the nifi_root_pg_id variable for correct clustering permissions

@@ -1,0 +1,12 @@
+- name: Create bootstrap container
+  shell: "docker run --name nifi_bootstrap -d {{ nifi_image }}"
+
+- name: Sleep
+  pause:
+    seconds: 30
+
+- name: Copy truststores and keystore from bootstrap container
+  shell: "docker cp nifi_bootstrap:/opt/nifi/nifi-current/conf/keystore.p12 {{ nifi_data_dir }}/conf/keystore.p12"
+
+- name: Cleanup bootstrap container
+  shell: "docker rm -f nifi_bootstrap"

@@ -1,0 +1,77 @@
+- name: Install packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - openssl
+    - default-jre
+
+- name: Create cert dir
+  file:
+    path: "{{ nifi_data_dir }}/_certs"
+    state: directory
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Set tmp certs dir
+  set_fact:
+    nifi_internal_tmp_certs_dir: "{{ nifi_data_dir }}/_certs"
+
+- name: Generate certificate authority key
+  shell:
+    cmd: "openssl genrsa -aes256 -out ca.key -passout pass:pass 3072"
+    chdir: "{{ nifi_internal_tmp_certs_dir }}"
+
+- name: Generate cluster node key
+  shell:
+    cmd: "openssl genrsa -aes256 -out nifi1.key -passout pass:pass 3072"
+    chdir: "{{ nifi_internal_tmp_certs_dir }}"
+
+- name: Generate certificate authority certificate
+  shell:
+    cmd: 'openssl req -new -x509 -days 1461 -key ca.key -sha256 -out ca.cer -subj "/CN=nifi-ca/OU=nifi/" -passin pass:pass'
+    chdir: "{{ nifi_internal_tmp_certs_dir }}"
+
+- name: Generate cluster node certificate signing request
+  shell:
+    cmd: 'openssl req -new -key nifi1.key -out nifi1.csr -subj "/CN=nifi1/OU=nifi/" -addext "subjectAltName = IP:192.168.1.1,DNS:localhost" -passin pass:pass'
+    chdir: "{{ nifi_internal_tmp_certs_dir }}"
+
+- name: Generate cluster node certificate, using certificate authority key
+  shell:
+    cmd: "openssl x509 -req -in nifi1.csr -CA ca.cer -CAkey ca.key -CAcreateserial -out nifi1.cer -days 365 -sha256 -copy_extensions=copyall -passin pass:pass"
+    chdir: "{{ nifi_internal_tmp_certs_dir }}"
+
+- name: Generate cluster node certificate chain
+  shell:
+    cmd: "cat nifi1.cer ca.cer >nifi1.chain.cer"
+    chdir: "{{ nifi_internal_tmp_certs_dir }}"
+
+- name: Generate truststore
+  shell:
+    cmd: "keytool -importcert -keystore truststore.p12 -storetype PKCS12 -file ca.cer -alias 1 -storepass {{ nifi_security_truststorePasswd }} -noprompt"
+    chdir: "{{ nifi_internal_tmp_certs_dir }}"
+
+- name: Generate keystore
+  shell:
+    cmd: "openssl pkcs12 -export -out keystore.p12 -inkey nifi1.key -in nifi1.chain.cer -passin pass:pass -passout pass:{{ nifi_security_keystorePasswd }}"
+    chdir: "{{ nifi_internal_tmp_certs_dir }}"
+
+- name: Copy certs
+  copy:
+    src: "{{ nifi_data_dir }}/_certs/truststore.p12"
+    dest: "{{ nifi_data_dir }}/conf/truststore.p12"
+    remote_src: yes
+
+- name: Copy certs
+  copy:
+    src: "{{ nifi_data_dir }}/_certs/keystore.p12"
+    dest: "{{ nifi_data_dir }}/conf/keystore.p12"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+    remote_src: yes
+
+- name: Cert cleanup
+  file:
+    path: "{{ nifi_internal_tmp_certs_dir }}"
+    state: absent

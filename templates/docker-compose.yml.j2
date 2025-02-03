@@ -4,12 +4,13 @@ services:
 
   {{ nifi_name }}:
     image: {{ nifi_image }}
+{% if nifi_hostname %}
     hostname: {{ nifi_hostname }}
+{% endif %}
     restart: {{ nifi_docker_restart_policy }}
     networks:
       - nifi_network
     volumes:
-      - {{ nifi_home_dir }}/nifi_certs:/opt/certs
       - {{ nifi_data_dir }}/conf:/opt/nifi/nifi-current/conf
       - {{ nifi_data_dir }}/extensions:/opt/nifi/nifi-current/extensions
       - {{ nifi_data_dir }}/database_repository:/opt/nifi/nifi-current/database_repository
@@ -29,21 +30,49 @@ services:
 {% endfor %}
 {% endif %}
     environment:
+{% if nifi_auth is defined %}
       AUTH: tls
-      KEYSTORE_PATH: {{ nifi_security_keystore }}
+{% endif %}
+{% if nifi_keystore_path is defined %}
+      KEYSTORE_PATH: {{ nifi_keystore_path }}
+{% if nifi_security_keystore_type is defined %}
       KEYSTORE_TYPE: {{ nifi_security_keystore_type }}
+{% endif %}
+{% if nifi_security_keystore_password is defined %}
       KEYSTORE_PASSWORD: {{ nifi_security_keystore_password }}
+{% endif %}
+{% endif %}
+{% if nifi_truststore_path is defined %}
       TRUSTSTORE_PATH: {{ nifi_security_truststore }}
+{% endif %}
+{% if nifi_security_truststore_type is defined %}
       TRUSTSTORE_TYPE: {{ nifi_security_truststore_type }}
+{% endif %}
+{% if nifi_security_truststore_password is defined %}
       TRUSTSTORE_PASSWORD: {{ nifi_security_truststore_password }}
+{% endif %}
+{% if nifi_cluster_is_node is defined %}
       NIFI_CLUSTER_IS_NODE: {{ nifi_cluster_is_node | string | lower}}
+{% endif %}
+{% if nifi_cluster_address is defined %}
       NIFI_CLUSTER_ADDRESS: {{ nifi_cluster_address }}
+{% endif %}
+{% if nifi_cluster_node_protocol_port is defined %}
       NIFI_CLUSTER_NODE_PROTOCOL_PORT: {{ nifi_cluster_node_protocol_port }}
+{% endif %}
+{% if nifi_zookeeper_connect_string is defined %}
       NIFI_ZK_CONNECT_STRING: {{ nifi_zookeeper_connect_string }}
+{% endif %}
+{% if nifi_cluster_flow_election_wait_time is defined %}
       NIFI_ELECTION_MAX_WAIT: {{ nifi_cluster_flow_election_wait_time }}
+{% endif %}
+{% if nifi_web_proxy_host is defined %}
       NIFI_WEB_PROXY_HOST: {{ nifi_web_proxy_host }}
+{% endif %}
+{% if nifi_web_https_host is defined %}
       NIFI_WEB_HTTPS_HOST: {{ nifi_web_https_host }}
-{% if nifi_single_user_mode  %}
+{% endif %}
+{% if nifi_single_user_mode %}
       SINGLE_USER_CREDENTIALS_USERNAME: {{ nifi_single_user_credentials_username }}
       SINGLE_USER_CREDENTIALS_PASSWORD: {{ nifi_single_user_credentials_password }}
       NIFI_SECURITY_USER_AUTHORIZER: single-user-authorizer

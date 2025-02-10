@@ -159,6 +159,41 @@
       nifi_cluster_node_event_history_size: "{{ nifi_cluster_node_event_history_size }}"
       nifi_cluster_node_connection_timeout: "{{ nifi_cluster_node_connection_timeout }}"
       nifi_cluster_node_read_timeout: "{{ nifi_cluster_node_read_timeout }}"
+      nifi_cluster_flow_election_max_wait_time: "{{ nifi_cluster_flow_election_max_wait_time }}"
+      nifi_zookeeper_connect_string: "{{ nifi_zookeeper_connect_string }}"
+      nifi_zookeeper_connect_timeout: "{{ nifi_zookeeper_connect_timeout }}"
+      nifi_zookeeper_session_timeout: "{{ nifi_zookeeper_session_timeout }}"
+      nifi_zookeeper_root_node: "{{ nifi_zookeeper_root_node }}"
+      nifi_zookeeper_client_secure: "{{ nifi_zookeeper_client_secure }}"
+      nifi_zookeeper_security_keystore: "{{ nifi_zookeeper_security_keystore }}"
+      nifi_zookeeper_security_keystoreType: "{{ nifi_zookeeper_security_keystoreType }}"
+      nifi_zookeeper_security_keystorePasswd: "{{ nifi_zookeeper_security_keystorePasswd }}"
+      nifi_zookeeper_security_truststore: "{{ nifi_zookeeper_security_truststore }}"
+      nifi_zookeeper_security_truststoreType: "{{ nifi_zookeeper_security_truststoreType }}"
+      nifi_zookeeper_security_truststorePasswd: "{{ nifi_zookeeper_security_truststorePasswd }}"
+      nifi_zookeeper_jute_maxbuffer: "{{ nifi_zookeeper_jute_maxbuffer }}"
+      nifi_zookeeper_auth_type: "{{ nifi_zookeeper_auth_type }}"
+      nifi_zookeeper_kerberos_removeHostFromPrincipal: "{{ nifi_zookeeper_kerberos_removeHostFromPrincipal }}"
+      nifi_zookeeper_kerberos_removeRealmFromPrincipal: "{{ nifi_zookeeper_kerberos_removeRealmFromPrincipal }}"
+      nifi_kerberos_krb5_file: "{{ nifi_kerberos_krb5_file }}"
+      nifi_kerberos_service_principal: "{{ nifi_kerberos_service_principal }}"
+      nifi_kerberos_service_keytab_location: "{{ nifi_kerberos_service_keytab_location }}"
+      nifi_analytics_predict_enabled: "{{ nifi_analytics_predict_enabled }}"
+      nifi_analytics_predict_interval: "{{ nifi_analytics_predict_interval }}"
+      nifi_analytics_query_interval: "{{ nifi_analytics_query_interval }}"
+      nifi_analytics_connection_model_implementation: "{{ nifi_analytics_connection_model_implementation }}"
+      nifi_analytics_connection_model_score_name: "{{ nifi_analytics_connection_model_score_name }}"
+      nifi_analytics_connection_model_score_threshold: "{{ nifi_analytics_connection_model_score_threshold }}"
+      nifi_cluster_leader_election_kubernetes_lease_prefix: "{{ nifi_cluster_leader_election_kubernetes_lease_prefix }}"
+      nifi_registry_check_for_rule_violations_before_commit: "{{ nifi_registry_check_for_rule_violations_before_commit }}"
+      nifi_monitor_long_running_task_schedule: "{{ nifi_monitor_long_running_task_schedule }}"
+      nifi_monitor_long_running_task_threshold: "{{ nifi_monitor_long_running_task_threshold }}"
+      nifi_diagnostics_on_shutdown_enabled: "{{ nifi_diagnostics_on_shutdown_enabled }}"
+      nifi_diagnostics_on_shutdown_verbose: "{{ nifi_diagnostics_on_shutdown_verbose }}"
+      nifi_diagnostics_on_shutdown_directory: "{{ nifi_diagnostics_on_shutdown_directory }}"
+      nifi_diagnostics_on_shutdown_max_filecount: "{{ nifi_diagnostics_on_shutdown_max_filecount }}"
+      nifi_diagnostics_on_shutdown_max_directory_size: "{{ nifi_diagnostics_on_shutdown_max_directory_size }}"
+      nifi_performance_tracking_percentage: "{{ nifi_performance_tracking_percentage }}"
 
 - name: Create nifi group
   group:
@@ -294,21 +329,18 @@
 - name: Copy truststore
   copy:
     src: "{{ nifi_truststore }}"
-    dest: "{{ nifi_certs_dir }}/truststore.jks"
+    dest: "{{ nifi_data_dir }}/conf/truststore.jks"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
   when: nifi_truststore is defined
 
 - name: Copy keystore
   copy:
     src: "{{ nifi_keystore }}"
-    dest: "{{ nifi_certs_dir }}/keystore.jks"
-  when: nifi_keystore is defined
-
-- name: Change permissions on /remote/file/path to ansible:user so we can write to it
-  file:
-    path: "{{ nifi_home_dir }}/nifi_certs"
-    recurse: true
+    dest: "{{ nifi_data_dir }}/conf/keystore.jks"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
+  when: nifi_keystore is defined
 
 - name: Add users to truststore
   loop: "{{ nifi_users + nifi_additional_certs }}"
@@ -346,16 +378,17 @@
     dest: "{{ nifi_home_dir }}/get_shell.sh"
     owner: "{{ nifi_user }}"
     group: "{{ nifi_group }}"
-# - name: Add view_keystore
-#   template:
-#     src: view_keystore.sh.j2
-#     dest: "{{ nifi_home_dir }}/view_keystore.sh"
-#     owner: "{{ nifi_user }}"
-#     group: "{{ nifi_group }}"
 
-# - name: Add view_truststore
-#   template:
-#     src: view_truststore.sh.j2
-#     dest: "{{ nifi_home_dir }}/view_truststore.sh"
-#     owner: "{{ nifi_user }}"
-#     group: "{{ nifi_group }}"
+- name: Add view_keystore
+  template:
+    src: view_keystore.sh.j2
+    dest: "{{ nifi_home_dir }}/view_keystore.sh"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"
+
+- name: Add view_truststore
+  template:
+    src: view_truststore.sh.j2
+    dest: "{{ nifi_home_dir }}/view_truststore.sh"
+    owner: "{{ nifi_user }}"
+    group: "{{ nifi_group }}"

@@ -16,15 +16,14 @@ nifi_name: nifi # Should be changed to your NiFi's FQDN
 nifi_user: nifi # This user MUST have UID 1000
 nifi_image: apache/nifi:2.0.0-M2
 nifi_home_dir: /home/nifi # NiFi's will store all of its data here by default
-nifi_nar_extensions_dir: /data/nar_extensions # Custom NAR files
 
 # Security
-nifi_keystore: keystore.jks # Filename of your keystore on the Host machine
-nifi_truststore: truststore.jks # Filename of your truststore on the Host machine
-nifi_security_keystore_password: keystorepass
-nifi_security_keystore_type: JKS
-nifi_security_truststore_password: truststorepass
-nifi_security_truststore_type: JKS
+nifi_security_keystore: keystore.p12 # Filename of your keystore on the Host machine
+nifi_security_truststore: truststore.p12 # Filename of your truststore on the Host machine
+nifi_security_keystorePasswd: keystorepass
+nifi_security_keystoreType: PKCS12
+nifi_security_truststorePasswd: truststorepass
+nifi_security_truststoreType: PKCS12
 
 # Cluster mode
 nifi_cluster_is_node: true # Enable or disable clustered mode
@@ -32,7 +31,7 @@ nifi_nodes: # Cluster members. Without this, NiFi nodes will not be able to comm
   - dn: CN=ec2-100-25-205-207.compute-1.amazonaws.com, OU=NIFI
 
 # Single user mode
-nifi_single_user_mode: false
+nifi_single_user_mode: true
 nifi_single_user_credentials_username: nifi
 nifi_single_user_credentials_password: nifinifinifinifi
 

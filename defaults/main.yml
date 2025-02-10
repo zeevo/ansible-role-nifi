@@ -8,13 +8,6 @@ nifi_group: nifi
 nifi_home_dir: /home/nifi
 nifi_data_dir: "{{ nifi_home_dir }}/data"
 nifi_network: nifi
-nifi_nar_extensions_dir: "{{ nifi_data_dir }}/nar_extensions"
-
-# nifi_truststore: truststore.jks
-# nifi_keystore: keystore.jks
-# nifi_auth: tls
-
-# Base environment
 
 # Single User Mode
 nifi_single_user_mode: false
@@ -29,20 +22,13 @@ nifi_users: []
 nifi_nodes:
   - dn: "CN={{ nifi_name }}, OU=NIFI"
 
-# Security
-# nifi_security_keystore_password: keystorepass
-# nifi_security_keystore: /opt/certs/keystore.jks
-# nifi_security_keystore_type: JKS
-# nifi_security_truststore_password: truststorepass
-# nifi_security_truststore: /opt/certs/truststore.jks
-# nifi_security_truststore_type: JKS
-
 # Docker
 nifi_ports:
   - "8443:8443"
   - "8080:8080"
-  - "8082:8082"
   - "6342:6342"
+  - "11443:11443"
+
 nifi_docker_restart_policy: always
 
 # Other
@@ -240,8 +226,66 @@ nifi_cluster_protocol_is_secure: true
 nifi_cluster_is_node: false
 nifi_cluster_leader_election_implementation: "CuratorLeaderElectionManager"
 nifi_cluster_node_address: ""
-nifi_cluster_node_protocol_port: ""
+nifi_cluster_node_protocol_port: "11443"
 nifi_cluster_node_protocol_max_threads: 50
 nifi_cluster_node_event_history_size: 25
 nifi_cluster_node_connection_timeout: "5 sec"
 nifi_cluster_node_read_timeout: "5 sec"
+nifi_cluster_flow_election_max_wait_time: "5 minutes"
+nifi_zookeeper_connect_string:
+nifi_zookeeper_connect_timeout: 10 secs
+nifi_zookeeper_session_timeout: 10 secs
+nifi_zookeeper_root_node: /nifi
+nifi_zookeeper_client_secure: false
+nifi_zookeeper_security_keystore:
+nifi_zookeeper_security_keystoreType:
+nifi_zookeeper_security_keystorePasswd:
+nifi_zookeeper_security_truststore:
+nifi_zookeeper_security_truststoreType:
+nifi_zookeeper_security_truststorePasswd:
+nifi_zookeeper_jute_maxbuffer:
+nifi_zookeeper_auth_type:
+nifi_zookeeper_kerberos_removeHostFromPrincipal:
+nifi_zookeeper_kerberos_removeRealmFromPrincipal:
+nifi_kerberos_krb5_file:
+nifi_kerberos_service_principal:
+nifi_kerberos_service_keytab_location:
+nifi_analytics_predict_enabled: false
+nifi_analytics_predict_interval: 3 mins
+nifi_analytics_query_interval: 5 mins
+nifi_analytics_connection_model_implementation: org_apache_nifi_controller_status_analytics_models_OrdinaryLeastSquares
+nifi_analytics_connection_model_score_name: rSquared
+nifi_analytics_connection_model_score_threshold: _90
+nifi_cluster_leader_election_kubernetes_lease_prefix:
+nifi_registry_check_for_rule_violations_before_commit:
+nifi_monitor_long_running_task_schedule:
+nifi_monitor_long_running_task_threshold:
+nifi_diagnostics_on_shutdown_enabled: false
+nifi_diagnostics_on_shutdown_verbose: false
+nifi_diagnostics_on_shutdown_directory: _/diagnostics
+nifi_diagnostics_on_shutdown_max_filecount: 10
+nifi_diagnostics_on_shutdown_max_directory_size: 10 MB
+nifi_performance_tracking_percentage: 0
+
+# bootstrap.conf
+nifi_java: java
+nifi_run_as: ""
+nifi_preserve_environment: false
+nifi_lib_dir: "./lib"
+nifi_conf_dir: "./conf"
+nifi_graceful_shutdown_seconds: 20
+nifi_java_arg_1: "-Dorg.apache.jasper.compiler.disablejsr199=true"
+nifi_java_arg_2: "-Xms1g"
+nifi_java_arg_3: "-Xmx1g"
+nifi_java_arg_5: "-Dsun.net.http.allowRestrictedHeaders=true"
+nifi_java_arg_6: "-Djava.protocol.handler.pkgs=sun.net.www.protocol"
+nifi_java_arg_14: "-Djava.awt.headless=true"
+nifi_bootstrap_sensitive_key: ""
+nifi_java_arg_15: "-Djava.security.egd=file:/dev/urandom"
+nifi_java_arg_16: "-Djavax.security.auth.useSubjectCredsOnly=true"
+nifi_java_arg_17: "-Dzookeeper.admin.enableServer=false"
+nifi_java_arg_20: "--add-opens=java.base/java.net=ALL-UNNAMED"
+nifi_notification_services_file: "./conf/bootstrap-notification-services.xml"
+nifi_notification_max_attempts: 5
+nifi_java_arg_curator_supress_excessive_logs: "-Dcurator-log-only-first-connection-issue-as-error-level=true"
+nifi_bootstrap_listen_port: 0

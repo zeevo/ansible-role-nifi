@@ -195,6 +195,25 @@
       nifi_diagnostics_on_shutdown_max_directory_size: "{{ nifi_diagnostics_on_shutdown_max_directory_size }}"
       nifi_performance_tracking_percentage: "{{ nifi_performance_tracking_percentage }}"
 
+- name: Check for docker
+  shell: docker > /dev/null 2>&1; echo $?
+  register: docker_exists
+  ignore_errors: true
+
+- name: Install docker
+  shell: curl -sSL https://get.docker.com | sh
+  when: docker_exists.stdout | int > 0
+
+- name: Create docker group
+  group:
+    name: docker
+    state: present
+
+- name: Add users to docker group
+  shell: usermod -aG docker {{ item }}
+  become: yes
+  loop: "{{ nifi_docker_users }}"
+
 - name: Create nifi group
   group:
     name: "{{ nifi_group }}"

@@ -10,7 +10,7 @@ nifi_data_dir: "{{ nifi_home_dir }}/data"
 nifi_network: nifi
 
 # Single User Mode
-nifi_single_user_mode: false
+nifi_single_user_mode: true
 nifi_single_user_credentials_username: nifi
 nifi_single_user_credentials_password: nifinifinifinifi
 

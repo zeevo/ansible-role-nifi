@@ -34,7 +34,7 @@
 
 - name: Generate cluster node certificate signing request
   shell:
-    cmd: 'openssl req -new -key nifi1.key -out nifi1.csr -subj "/CN=nifi1/OU=nifi/" -addext "subjectAltName = IP:192.168.1.1,DNS:localhost" -passin pass:pass'
+    cmd: 'openssl req -new -key nifi1.key -out nifi1.csr -subj "/CN=nifi1/OU=nifi/" -addext "subjectAltName = {{ nifi_subject_alt_name }}" -passin pass:pass'
     chdir: "{{ nifi_internal_tmp_certs_dir }}"
 
 - name: Generate cluster node certificate, using certificate authority key

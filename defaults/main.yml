@@ -5,7 +5,7 @@ nifi_user: nifi # This user MUST have UID 1000
 nifi_https_port: 8443
 nifi_image: apache/nifi:2.1.0
 nifi_group: nifi
-nifi_home_dir: /home/nifi
+nifi_home_dir: "/home/{{ nifi_user }}"
 nifi_data_dir: "{{ nifi_home_dir }}/data"
 nifi_network: nifi
 
@@ -32,8 +32,8 @@ nifi_ports:
 nifi_docker_restart_policy: always
 
 # Other
+nifi_subject_alt_name: IP:192.168.1.1,IP:127.0.0.1,DNS:localhost
 nifi_additional_certs: []
-nifi_subject_alternative_names: ["localhost"]
 nifi_extra_docker_volumes: []
 nifi_auto_create_stores: false
 nifi_ansible_xml_managed_banner: |

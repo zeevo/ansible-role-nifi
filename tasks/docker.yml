@@ -15,4 +15,4 @@
 - name: Add users to docker group
   shell: usermod -aG docker {{ item }}
   become: yes
-  loop: "{{ nifi_docker_users }}"
+  loop: "{{ nifi_users }}"

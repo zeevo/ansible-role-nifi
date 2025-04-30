@@ -19,6 +19,7 @@ services:
       - {{ nifi_data_dir }}/provenance_repository:/opt/nifi/nifi-current/provenance_repository
       - {{ nifi_data_dir }}/state:/opt/nifi/nifi-current/state
       - {{ nifi_data_dir }}/logs:/opt/nifi/nifi-current/logs
+      - {{ nifi_data_dir }}/{{ nifi_additional_nar_library_directory }}:/opt/nifi/nifi-current/{{ nifi_additional_nar_library_directory }}
       - {{ nifi_data_dir }}/nar_extensions:/opt/nifi/nifi-current/nar_extensions
 {% for item in nifi_extra_docker_volumes %}
       - {{ item }}

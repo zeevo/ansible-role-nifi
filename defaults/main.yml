@@ -5,7 +5,7 @@ nifi_user: nifi # This user MUST have UID 1000
 nifi_https_port: 8443
 nifi_image: apache/nifi:2.1.0
 nifi_group: nifi
-nifi_home_dir: "/home/{{ nifi_user }}"
+nifi_home_dir: "/home/{{ nifi_user }}/nifi"
 nifi_data_dir: "{{ nifi_home_dir }}/data"
 nifi_network: nifi
 
@@ -71,6 +71,7 @@ nifi_root_pg_policies:
 nifi_docker_compose: "{{ nifi_home_dir }}/docker-compose.yml"
 nifi_certs_dir: "{{ nifi_home_dir }}/nifi_certs"
 nifi_root_pg_id: 554766c3-018f-1000-093c-20f8f3656d4c
+nifi_additional_nar_library_directory: ./lib1
 
 # Properties
 nifi_flow_configuration_file: "./conf/flow.json.gz"
@@ -90,6 +91,7 @@ nifi_authorizer_configuration_file: "./conf/authorizers.xml"
 nifi_login_identity_provider_configuration_file: "./conf/login-identity-providers.xml"
 nifi_ui_banner_text: ""
 nifi_nar_library_directory: "./lib"
+nifi_nar_library_directory_lib1: "{{ nifi_additional_nar_library_directory }}"
 nifi_nar_library_autoload_directory: "/opt/nifi/nifi-current/nar_extensions"
 nifi_nar_working_directory: "./work/nar/"
 nifi_nar_unpack_uber_jar: false

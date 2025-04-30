@@ -18,6 +18,7 @@
       nifi_login_identity_provider_configuration_file: "{{ nifi_login_identity_provider_configuration_file }}"
       nifi_ui_banner_text: "{{ nifi_ui_banner_text }}"
       nifi_nar_library_directory: "{{ nifi_nar_library_directory }}"
+      nifi_nar_library_directory_custom: "{{ nifi_additional_nar_library_directory }}"
       nifi_nar_library_autoload_directory: "{{ nifi_nar_library_autoload_directory }}"
       nifi_nar_working_directory: "{{ nifi_nar_working_directory }}"
       nifi_nar_unpack_uber_jar: "{{ nifi_nar_unpack_uber_jar }}"
@@ -249,6 +250,7 @@
     - provenance_repository
     - state
     - nar_extensions
+    - "{{ nifi_additional_nar_library_directory }}"
 
 - name: Add nifi docker compose
   template:

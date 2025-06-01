@@ -3,7 +3,7 @@ nifi_name: nifi
 nifi_hostname: "{{ nifi_name }}"
 nifi_user: nifi # This user MUST have UID 1000
 nifi_https_port: 8443
-nifi_image: apache/nifi:2.1.0
+nifi_image: apache/nifi:2.4.0
 nifi_group: nifi
 nifi_home_dir: "/home/{{ nifi_user }}/nifi"
 nifi_data_dir: "{{ nifi_home_dir }}/data"
